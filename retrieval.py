@@ -5,6 +5,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 df = pd.read_excel("veri seti")
 
+
+
 # NaN değerleri temizle
 df['text'] = df['text'].fillna('').astype(str)
 df['expected_answer'] = df['expected_answer'].fillna('').astype(str)
