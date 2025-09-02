@@ -1,6 +1,6 @@
 import torch
 from transformers import RagTokenizer, RagRetriever, RagTokenForGeneration
-from retrieval import retrieve_top_k  # <- önceki dosyadan çekiyoruz
+from retrieval import retrieve_top_k_tf_idf  
 
 # RAG modeli yükleme
 tokenizer = RagTokenizer.from_pretrained("facebook/rag-token-nq")
@@ -11,7 +11,7 @@ device = "cuda" if torch.cuda.is_available() else "cpu"
 model.to(device)
 
 def generate_rag_answer(user_query, top_k=3):
-    retrieved_texts = retrieve_top_k(user_query, top_k)  # <- burada çekiyoruz
+    retrieved_texts = retrieve_top_k_tf_idf(user_query, top_k) 
     
     if len(retrieved_texts) == 0:
         return "Bu konuda elimde yeterli bilgi bulunmamaktadır."
