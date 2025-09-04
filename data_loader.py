@@ -2,10 +2,6 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 def load_and_prepare_data(filepath):
-    """
-    JSON veri setini yükler ve ML için hazırlar
-    """
-    # JSON dosyasını yükle
     df = pd.read_json(filepath, encoding="utf-8")
     
     # Text kolonunu ayarla

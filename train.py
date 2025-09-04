@@ -5,22 +5,19 @@ import torch
 from data_loader import load_and_prepare_data
 import numpy as np
 import evaluate  
-import joblib  # Intent encoder'ı kaydetmek için
+import joblib 
 
 def tokenize_function(batch, tokenizer):
     return tokenizer(batch['text'], padding=True, truncation=True, max_length=256)
 
 def main():
     # Veri yükle
-    df, intent_encoder = load_and_prepare_data('veriseti.json')
+    df, intent_encoder = load_and_prepare_data('veriseti')
     
     # Intent encoder'ı kaydet
     joblib.dump(intent_encoder, './models/intent_encoder.pkl')
-    
-    # Train/validation ayrımı
     train_df, val_df = train_test_split(df, test_size=0.2, random_state=42)
 
-    # Dataset oluştur
     train_dataset = Dataset.from_pandas(train_df[['text', 'intent_label']])
     val_dataset = Dataset.from_pandas(val_df[['text', 'intent_label']])
 
@@ -28,19 +25,16 @@ def main():
     model_name = "dbmdz/bert-base-turkish-cased"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-    # Tokenize
+    # Tokenize işlemi
     train_dataset = train_dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True)
     val_dataset = val_dataset.map(lambda x: tokenize_function(x, tokenizer), batched=True)
 
-    # Kolon isimlerini düzenle
+    
     train_dataset = train_dataset.rename_column("intent_label", "labels")
     val_dataset = val_dataset.rename_column("intent_label", "labels")
 
-    # Format ayarla
     train_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
     val_dataset.set_format(type='torch', columns=['input_ids', 'attention_mask', 'labels'])
-
-    # Model oluştur
     num_labels = len(intent_encoder.classes_)
     model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 
@@ -60,8 +54,6 @@ def main():
         logging_dir='./logs',
         logging_steps=10,
     )
-
-    # Metric
     metric = evaluate.load("accuracy")
 
     def compute_metrics(eval_pred):

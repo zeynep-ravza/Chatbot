@@ -10,15 +10,14 @@ paraphrase = pipeline("text2text-generation", model="ramsrigouthamg/t5_paraphras
 # Synonym augmenter
 syn_aug = naw.SynonymAug(aug_src='wordnet')
 
-# --- TEMİZLEME FONKSİYONLARI ---
 
 def clean_repeated_words(text):
     """Aynı kelimenin peş peşe tekrar etmesini engeller."""
-    # Tekrar eden kelimeleri tekilleştir
+
     text = re.sub(r'\b(\w+)( \1){1,}\b', r'\1', text)
     # Çok fazla tekrar varsa kırp
     words = text.split()
-    if len(words) > 30:  # çok uzun tekrarları engelle
+    if len(words) > 30: 
         text = " ".join(words[:30])
     return text.strip()
 
@@ -40,10 +39,8 @@ def clean_text(text):
     text = remove_bad_terms(text)
     return text
 
-# --- ANA ÇALIŞMA ---
 
-# Veri setini oku
-df = pd.read_excel("C:/Users/ZEYNEP/Desktop/chatbot/data/veriseti.xlsx")
+df = pd.read_excel("veri seti")
 df = df.dropna(subset=['Soru / Mesaj İçeriği'])
 
 new_rows = []
@@ -55,13 +52,13 @@ for idx, row in tqdm(df.iterrows(), total=len(df)):
     # 1) Paraphrase üret
     para_result = paraphrase(f"paraphrase: {original_text}", max_length=70, do_sample=True)
     paraphrased_text = para_result[0]['generated_text']
-    paraphrased_text = clean_text(paraphrased_text)  # Temizlik
+    paraphrased_text = clean_text(paraphrased_text)  
 
     # 2) Synonym replacement
     synonym_text = syn_aug.augment(original_text)
     if isinstance(synonym_text, list):
-        synonym_text = " ".join(synonym_text)  # liste ise stringe çevir
-    synonym_text = clean_text(synonym_text)  # Temizlik
+        synonym_text = " ".join(synonym_text) 
+    synonym_text = clean_text(synonym_text) 
 
     # Paraphrased satır
     new_rows.append({
@@ -88,7 +85,6 @@ for idx, row in tqdm(df.iterrows(), total=len(df)):
 # Orijinal + yeni satırlar birleştir
 augmented_df = pd.concat([df, pd.DataFrame(new_rows)], ignore_index=True)
 
-# Excel dosyası olarak kaydet
+
 augmented_df.to_excel("augmented_dataset_cleaned.xlsx", index=False, encoding="utf-8-sig")
 
-print("✅ Veri augmentation + temizlik tamamlandı! Toplam satır sayısı:", len(augmented_df))

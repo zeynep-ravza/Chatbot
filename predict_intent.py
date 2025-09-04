@@ -2,7 +2,6 @@ import torch
 import joblib
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
-# Eğitimde kullandığın model yolu
 MODEL_PATH = "./models/intent_model"
 ENCODER_PATH = "./models/intent_encoder.pkl"
 MODEL_NAME = "dbmdz/bert-base-turkish-cased"
